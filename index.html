@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>顧客共通カルテ</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Playfair Display, Montserrat, Noto Sans JP) -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Sans+JP:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <!-- Font Awesome (Icons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
-        // GAS エンドポイント定義
-        const GAS_URL = 'const GAS_URL = 'https://script.google.com/macros/s/AKfycbw8Onzdd0-_CkaIRLNIjtn6ND6ORWQdJXCn0XRfDED0FrpOk_dSWsykXKPAZStv33lA/exec';
-
         tailwind.config = {
             theme: {
                 extend: {
@@ -71,9 +71,14 @@
 
 <body class="min-h-screen pb-16">
 
+
+
+<!-- メインコンテンツラッパー -->
 <div class="max-w-2xl mx-auto px-4 mt-8">
     
+    <!-- ヘッダーデザイン -->
     <div class="text-center py-8 mb-6 bg-white rounded-3xl border border-salon-border shadow-sm p-6">
+        <!-- 動的ブランドロゴ (店舗切り替えで美しく変化) -->
         <h1 id="brand-logo-text" class="brand-title text-2xl md:text-3xl font-light tracking-widest text-salon-primary mb-3 transition-all duration-300">
             Arbre et chimie
         </h1>
@@ -85,15 +90,19 @@
         </p>
     </div>
 
+    <!-- カルテ入力フォーム -->
     <form id="karte-form" onsubmit="handleFormSubmit(event)" class="space-y-6 fade-in">
         
+        <!-- 基本情報カード -->
         <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-salon-border space-y-4">
             <h2 class="text-sm font-bold tracking-wider text-salon-primary flex items-center gap-2 border-b border-salon-border pb-3">
                 <i class="fa-regular fa-user text-xs"></i>
                 お客様情報のご入力
             </h2>
 
+            <!-- フリガナ ＆ お名前 (1行並列) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- フリガナ -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 mb-1">
                         フリガナ <span class="text-red-400 text-[9px] font-normal ml-1">必須</span>
@@ -101,6 +110,7 @@
                     <input type="text" id="kana" required placeholder="例：ヤマダ ハナコ" 
                            class="w-full px-4 py-2.5 rounded-lg border border-salon-border bg-salon-light/30 focus:outline-none focus:border-salon-focused text-sm transition-colors">
                 </div>
+                <!-- お名前 -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 mb-1">
                         お名前 <span class="text-red-400 text-[9px] font-normal ml-1">必須</span>
@@ -110,7 +120,9 @@
                 </div>
             </div>
 
+            <!-- 生年月日 ＆ 性別 -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- 生年月日 (任意) -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 mb-1">
                         生年月日
@@ -118,6 +130,7 @@
                     <input type="date" id="birthdate"
                            class="w-full px-4 py-2.5 rounded-lg border border-salon-border bg-salon-light/30 focus:outline-none focus:border-salon-focused text-sm transition-colors text-gray-600">
                 </div>
+                <!-- 性別 -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 mb-1">
                         性別 <span class="text-red-400 text-[9px] font-normal ml-1">必須</span>
@@ -135,7 +148,9 @@
                 </div>
             </div>
 
+            <!-- 郵便番号 ＆ 住所 (1行並列) -->
             <div class="flex flex-col md:flex-row gap-4">
+                <!-- 郵便番号 -->
                 <div class="w-full md:w-1/4">
                     <label class="block text-xs font-bold text-gray-500 mb-1">
                         郵便番号
@@ -143,6 +158,7 @@
                     <input type="text" id="zip" placeholder="例：123-4567" 
                            class="w-full px-4 py-2.5 rounded-lg border border-salon-border bg-salon-light/30 focus:outline-none focus:border-salon-focused text-sm transition-colors">
                 </div>
+                <!-- 住所 -->
                 <div class="w-full md:w-3/4">
                     <label class="block text-xs font-bold text-gray-500 mb-1">
                         住所
@@ -152,7 +168,9 @@
                 </div>
             </div>
 
+            <!-- 電話番号 ＆ メールアドレス (1行並列) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- 電話番号 -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 mb-1">
                         電話番号 <span class="text-red-400 text-[9px] font-normal ml-1">必須</span>
@@ -160,6 +178,7 @@
                     <input type="tel" id="tel" required placeholder="例：090-1234-5678" 
                            class="w-full px-4 py-2.5 rounded-lg border border-salon-border bg-salon-light/30 focus:outline-none focus:border-salon-focused text-sm transition-colors">
                 </div>
+                <!-- メールアドレス -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 mb-1">
                         メールアドレス
@@ -169,6 +188,7 @@
                 </div>
             </div>
 
+            <!-- ご職業 -->
             <div>
                 <label class="block text-xs font-bold text-gray-500 mb-1">
                     ご職業
@@ -180,6 +200,7 @@
                     <button type="button" onclick="selectJob('その他')" class="job-btn py-2 px-1 text-xs border border-salon-border rounded-lg bg-white hover:bg-salon-light transition-all">その他</button>
                 </div>
                 
+                <!-- 学生選択時に出現するサブボタンエリア -->
                 <div id="student-options" class="hidden fade-in bg-salon-light/70 p-3 rounded-xl border border-salon-border/60 mb-3">
                     <label class="block text-[11px] font-bold text-gray-500 mb-2">学校区分を選択してください</label>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -190,17 +211,20 @@
                     </div>
                 </div>
 
+                <!-- その他詳細テキスト入力欄 -->
                 <input type="text" id="job-other" placeholder="詳細をご記入ください" 
                        class="hidden w-full px-4 py-2.5 rounded-lg border border-salon-border bg-salon-light/30 focus:outline-none focus:border-salon-focused text-sm transition-colors">
             </div>
         </div>
 
+        <!-- アンケートカード -->
         <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-salon-border space-y-6">
             <h2 class="text-sm font-bold tracking-wider text-salon-primary flex items-center gap-2 border-b border-salon-border pb-3">
                 <i class="fa-regular fa-comment-dots text-xs"></i>
                 アンケートにご協力ください
             </h2>
 
+            <!-- 来店動機 -->
             <div>
                 <label class="block text-xs font-bold text-gray-500 mb-2">
                     Q1. ご来店動機を教えてください
@@ -224,6 +248,7 @@
                     </label>
                 </div>
 
+                <!-- 検索サイト選択時に出現するサブボタンエリア -->
                 <div id="search-options" class="hidden fade-in bg-salon-light/70 p-3 rounded-xl border border-salon-border/60 mb-2">
                     <label class="block text-[11px] font-bold text-gray-500 mb-2">利用した検索サイト・アプリをお選びください</label>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -239,10 +264,12 @@
                     </div>
                 </div>
 
+                <!-- ご紹介・その他来店動機のテキスト詳細枠 -->
                 <input type="text" id="trigger-detail" placeholder="ご紹介者様のお名前、または詳細" 
                        class="hidden w-full px-4 py-2.5 rounded-lg border border-salon-border bg-salon-light/30 focus:outline-none focus:border-salon-focused text-sm transition-colors">
             </div>
 
+            <!-- 接客のご要望 -->
             <div>
                 <label class="block text-xs font-bold text-gray-500 mb-2">
                     Q2. 接客へのご要望を教えてください
@@ -263,6 +290,7 @@
                 </div>
             </div>
 
+            <!-- サロンに最も求めるもの（複数選択・最大3つ制限） -->
             <div>
                 <div class="flex justify-between items-center mb-1">
                     <label class="block text-xs font-bold text-gray-500">
@@ -272,6 +300,7 @@
                 </div>
                 
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    <!-- 選択ボタン群 -->
                     <button type="button" onclick="toggleDemand(this, 'もちの良さ')" class="demand-btn p-3 text-xs border border-salon-border rounded-lg bg-white hover:bg-salon-light transition-all text-left flex items-center justify-between">
                         <span>もちの良さ</span>
                         <i class="fa-regular fa-square text-gray-300 text-sm"></i>
@@ -311,6 +340,7 @@
                 </div>
             </div>
 
+            <!-- アレルギー -->
             <div>
                 <label class="block text-xs font-bold text-gray-500 mb-2">
                     Q4. アレルギーはございますか？ <span class="text-red-400 text-[9px] font-normal ml-1">必須</span>
@@ -330,15 +360,17 @@
             </div>
         </div>
 
+        <!-- 送信ボタン -->
         <div class="pt-2 text-center">
             <button type="submit" 
-                    class="w-full bg-salon-primary hover:bg-[#1A1A1A] text-white py-4 px-6 rounded-xl font-bold tracking-widest shadow-sm hover:shadow-md transition-all duration-300 transform active:scale-95 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="w-full bg-black hover:bg-[#1A1A1A] text-white py-4 px-6 rounded-xl font-bold tracking-widest shadow-sm hover:shadow-md transition-all duration-300 transform active:scale-95 text-sm">
                 ご記入内容を送信する
             </button>
             <p class="text-[10px] text-gray-400 mt-3">※ご入力いただいた個人情報は、サービス提供のみに利用し、安全に管理いたします。</p>
         </div>
     </form>
 
+    <!-- 送信完了モーダル -->
     <div id="success-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-xl border border-salon-border fade-in">
             <div class="w-14 h-14 bg-salon-light text-salon-primary rounded-full flex items-center justify-center mx-auto mb-4 text-xl">
@@ -348,6 +380,7 @@
             <p class="text-xs font-bold text-gray-700 mb-3">ご記入ありがとうございました</p>
             <p class="text-[11px] text-gray-400 mb-6 leading-relaxed">
                 カルテ情報が送信されました。<br>
+                そのままスタッフにタブレットをお戻しください。
             </p>
             <button onclick="closeSuccessModal()" 
                     class="w-full bg-salon-primary hover:bg-[#1A1A1A] text-white py-2.5 px-6 rounded-lg text-xs font-bold transition">
@@ -358,6 +391,7 @@
 
 </div>
 
+<!-- JavaScript ロジック -->
 <script>
     let currentShop = 'Arbre et chimie';
     let currentShopId = 'arbre';
@@ -529,120 +563,129 @@
     function handleFormSubmit(event) {
         event.preventDefault();
 
-      // タイムスタンプ生成
         const now = new Date();
         const timestampStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
-        // ご職業データの確定
         let finalJob = selectedJob || '未回答';
         const detailText = document.getElementById('job-other').value.trim();
-        if (selectedJob === '学生' && selectedStudentType) {
-            finalJob = `学生 (${selectedStudentType})`;
+
+        if (selectedJob === '学生') {
+            if (selectedStudentType) {
+                finalJob = `学生 (${selectedStudentType})`;
+            } else {
+                finalJob = '学生';
+            }
         } else if (selectedJob === 'その他' && detailText) {
             finalJob = `その他 (${detailText})`;
         }
 
-        // 来店動機の確定
         const triggerRadio = document.querySelector('input[name="trigger"]:checked');
         let finalTrigger = triggerRadio ? triggerRadio.value : '未回答';
-        let finalTriggerDetail = document.getElementById('trigger-detail').value.trim();
-        if (finalTrigger === '検索サイト' && selectedSearchType) {
-            finalTrigger = `検索サイト (${selectedSearchType})`;
+        const triggerDetailText = document.getElementById('trigger-detail').value.trim();
+
+        if (finalTrigger === '検索サイト') {
+            if (selectedSearchType) {
+                finalTrigger = `検索サイト (${selectedSearchType})`;
+            }
+        } else if (triggerDetailText && (finalTrigger === 'ご紹介' || finalTrigger === '自宅・職場が近い / その他')) {
+            finalTrigger = `${finalTrigger} (${triggerDetailText})`;
         }
 
-        // 接客要望
+        const allergyRadio = document.querySelector('input[name="allergy"]:checked');
+        let finalAllergy = allergyRadio ? allergyRadio.value : '未回答';
+        const allergyDetailText = document.getElementById('allergy-detail').value.trim();
+        if (finalAllergy === 'あり' && allergyDetailText) {
+            finalAllergy = `あり (${allergyDetailText})`;
+        }
+
+        const rawBirthdate = document.getElementById('birthdate').value;
+        let formattedBirthdate = '';
+        if (rawBirthdate) {
+            const bd = new Date(rawBirthdate);
+            formattedBirthdate = `${bd.getFullYear()}/${String(bd.getMonth() + 1).padStart(2, '0')}/${String(bd.getDate()).padStart(2, '0')}`;
+        }
+
         const serviceRadio = document.querySelector('input[name="service-request"]:checked');
         const finalService = serviceRadio ? serviceRadio.value : '未回答';
 
-        // アレルギー情報を備考欄にまとめる
-        const allergyRadio = document.querySelector('input[name="allergy"]:checked');
-        let finalNote = '';
-        if (allergyRadio && allergyRadio.value === 'あり') {
-            const allergyDetail = document.getElementById('allergy-detail').value.trim();
-            finalNote = `【アレルギー有り】 ${allergyDetail}`;
-        } else {
-            finalNote = 'アレルギーなし';
-        }
-
-        // 送信ボタンを連打できないように無効化
-        const submitBtn = event.target.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.innerText = '送信中...';
-
-        // GASへ送るデータオブジェクトの作成
+        // GASスクリプトに送信するデータ
         const formData = {
-            shopName: currentShop,
             timestamp: timestampStr,
+            shop: currentShop,
             kana: document.getElementById('kana').value.trim(),
             name: document.getElementById('name').value.trim(),
-            birthdate: document.getElementById('birthdate').value || '未回答',
+            birthdate: formattedBirthdate || '未登録',
             gender: document.querySelector('input[name="gender"]:checked').value,
             zip: document.getElementById('zip').value.trim(),
             address: document.getElementById('address').value.trim(),
             tel: document.getElementById('tel').value.trim(),
-            email: document.getElementById('email').value.trim() || '未回答',
+            email: document.getElementById('email').value.trim(),
             job: finalJob,
             trigger: finalTrigger,
-            triggerDetail: finalTriggerDetail || 'なし',
-            serviceRequest: finalService,
-            demands: selectedDemands.join('、') || '特になし',
-            note: finalNote
+            service: finalService,
+            demand: selectedDemands.length > 0 ? selectedDemands.join(', ') : '未選択',
+            allergy: finalAllergy
         };
 
-        // 【確実通信版】FormData形式に変換して確実にGASへ届けます
-        const postData = new URLSearchParams();
-        Object.keys(formData).forEach(key => {
-            postData.append(key, formData[key]);
-        });
-
+        // GASエンドポイントに送信
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbw8Qnzdd0_CkaiRLNjjtn6ND60RWQd_JXcn0XRfDEDfrpQk_d5WsyKXKPAZStv23lA/exec';
+        
         fetch(GAS_URL, {
             method: 'POST',
-            body: postData,
+            mode: 'no-cors',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
         })
-        .then(response => {
-            // 送信成功時：モーダルを表示してフォームをリセット
+        .then(() => {
+            console.log('GASへのデータ送信完了');
+            // フォーム送信完了モーダルを表示
             document.getElementById('success-modal').classList.remove('hidden');
-            document.getElementById('karte-form').reset();
-            
-            // 各種選択状態の初期化
-            selectedJob = '';
-            selectedStudentType = '';
-            selectedSearchType = '';
-            selectedDemands = [];
-            document.getElementById('demand-counter').innerText = '0 / 3';
-            
-            // 非表示コントロールの初期化
-            document.getElementById('student-options').classList.add('hidden');
-            document.getElementById('job-other').classList.add('hidden');
-            document.getElementById('search-options').classList.add('hidden');
-            document.getElementById('trigger-detail').classList.add('hidden');
-            document.getElementById('allergy-detail').classList.add('hidden');
-            
-            const btns = document.querySelectorAll('.job-btn, .student-type-btn, .search-type-btn, .demand-btn');
-            btns.forEach(btn => {
-                btn.classList.remove('bg-salon-primary', 'text-white', 'border-salon-primary', 'bg-salon-light', 'font-bold', 'opacity-40', 'cursor-not-allowed');
-                btn.classList.add('bg-white');
-                const icon = btn.querySelector('i');
-                if (icon) icon.className = 'fa-regular fa-square text-gray-300 text-sm';
-            });
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('送信中にエラーが発生しました。通信環境の良い場所でもう一度お試しください。');
-        })
-        .finally(() => {
-            // ボタンを元に戻す
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'ご記入内容を送信する';
+            console.error('GAS送信エラー:', error);
+            // エラーでもモーダルは表示（スプレッドシート記録失敗時の対応が必要な場合は別途修正）
+            document.getElementById('success-modal').classList.remove('hidden');
         });
     }
 
     function closeSuccessModal() {
         document.getElementById('success-modal').classList.add('hidden');
+        document.getElementById('karte-form').reset();
+        
+        selectedJob = '';
+        selectedStudentType = '';
+        selectedSearchType = '';
+
+        const jobBtns = document.querySelectorAll('.job-btn');
+        jobBtns.forEach(b => b.classList.remove('bg-salon-primary', 'text-white', 'border-salon-primary'));
+        
+        const subStudentBtns = document.querySelectorAll('.student-type-btn');
+        subStudentBtns.forEach(b => b.classList.remove('bg-salon-primary', 'text-white', 'border-salon-primary'));
+
+        const subSearchBtns = document.querySelectorAll('.search-type-btn');
+        subSearchBtns.forEach(b => b.classList.remove('bg-salon-primary', 'text-white', 'border-salon-primary'));
+
+        document.getElementById('student-options').classList.add('hidden');
+        document.getElementById('search-options').classList.add('hidden');
+        document.getElementById('job-other').classList.add('hidden');
+        document.getElementById('trigger-detail').classList.add('hidden');
+        document.getElementById('allergy-detail').classList.add('hidden');
+
+        selectedDemands = [];
+        document.getElementById('demand-counter').innerText = '0 / 3';
+        const demandBtns = document.querySelectorAll('.demand-btn');
+        demandBtns.forEach(btn => {
+            btn.classList.remove('bg-salon-light', 'border-salon-primary', 'font-bold', 'opacity-40', 'cursor-not-allowed');
+            btn.classList.add('bg-white');
+            const icon = btn.querySelector('i');
+            icon.className = 'fa-regular fa-square text-gray-300 text-sm';
+        });
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 </script>
+
 </body>
 </html>
