@@ -529,7 +529,7 @@
     function handleFormSubmit(event) {
         event.preventDefault();
 
-        // タイムスタンプ生成
+       // タイムスタンプ生成
         const now = new Date();
         const timestampStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
@@ -564,16 +564,21 @@
             finalNote = 'アレルギーなし';
         }
 
-        // GASへ送信するデータの組み立て
-        const payload = {
+        // 送信ボタンを連打できないように無効化
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerText = '送信中...';
+
+        // GASへ送るデータオブジェクトの作成
+        const formData = {
+            shopName: currentShop,
             timestamp: timestampStr,
-            shopName: currentShop, // 現在選択されている店舗の正確な名前
             kana: document.getElementById('kana').value.trim(),
             name: document.getElementById('name').value.trim(),
             birthdate: document.getElementById('birthdate').value || '未回答',
-            gender: document.querySelector('input[name="gender"]:checked')?.value || '未回答',
-            zip: document.getElementById('zip').value.trim() || '未回答',
-            address: document.getElementById('address').value.trim() || '未回答',
+            gender: document.querySelector('input[name="gender"]:checked').value,
+            zip: document.getElementById('zip').value.trim(),
+            address: document.getElementById('address').value.trim(),
             tel: document.getElementById('tel').value.trim(),
             email: document.getElementById('email').value.trim() || '未回答',
             job: finalJob,
@@ -584,52 +589,50 @@
             note: finalNote
         };
 
-        // ボタンをローディング状態にする
-        const submitBtn = event.target.querySelector('button[type="submit"]');
-        const originalBtnText = submitBtn.innerText;
-        submitBtn.innerText = "送信中...";
-        submitBtn.disabled = true;
-
-        // GASへPOST送信
+        // 【ここから消えていた送信処理】非同期通信でGASへPOST送信
         fetch(GAS_URL, {
             method: 'POST',
-            mode: 'no-cors',
+            mode: 'no-cors', // クロスドメインエラーを回避
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(formData)
         })
         .then(() => {
-            // 送信成功時：完了モーダルを表示してフォームと変数をクリア
+            // 送信成功時：モーダルを表示してフォームをリセット
             document.getElementById('success-modal').classList.remove('hidden');
             document.getElementById('karte-form').reset();
             
-            // 各カスタム選択ボタンのスタイルリセット
+            // 各種選択状態の初期化
+            selectedJob = '';
+            selectedStudentType = '';
+            selectedSearchType = '';
             selectedDemands = [];
-            document.getElementById('demand-counter').innerText = "0 / 3";
-            document.querySelectorAll('.demand-btn').forEach(btn => {
-                btn.classList.remove('bg-salon-light', 'border-salon-primary', 'font-bold', 'opacity-40', 'cursor-not-allowed');
-                btn.classList.add('bg-white');
-                btn.querySelector('i').className = 'fa-regular fa-square text-gray-300 text-sm';
-            });
-            document.querySelectorAll('.job-btn').forEach(btn => {
-                btn.classList.remove('bg-salon-primary', 'text-white', 'border-salon-primary');
-                btn.classList.add('bg-white', 'hover:bg-salon-light');
-            });
+            document.getElementById('demand-counter').innerText = '0 / 3';
+            
+            // 非表示コントロールの初期化
             document.getElementById('student-options').classList.add('hidden');
-            document.getElementById('search-options').classList.add('hidden');
             document.getElementById('job-other').classList.add('hidden');
+            document.getElementById('search-options').classList.add('hidden');
             document.getElementById('trigger-detail').classList.add('hidden');
             document.getElementById('allergy-detail').classList.add('hidden');
+            
+            const btns = document.querySelectorAll('.job-btn, .student-type-btn, .search-type-btn, .demand-btn');
+            btns.forEach(btn => {
+                btn.classList.remove('bg-salon-primary', 'text-white', 'border-salon-primary', 'bg-salon-light', 'font-bold', 'opacity-40', 'cursor-not-allowed');
+                btn.classList.add('bg-white');
+                const icon = btn.querySelector('i');
+                if (icon) icon.className = 'fa-regular fa-square text-gray-300 text-sm';
+            });
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('送信に失敗しました。電波状況を確認して再度お試しください。');
+            alert('送信中にエラーが発生しました。通信環境の良い場所でもう一度お試しください。');
         })
         .finally(() => {
-            // ボタンの状態を復元
-            submitBtn.innerText = originalBtnText;
+            // ボタンを元に戻す
             submitBtn.disabled = false;
+            submitBtn.innerText = 'ご記入内容を送信する';
         });
     }
 
