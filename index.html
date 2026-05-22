@@ -529,7 +529,7 @@
     function handleFormSubmit(event) {
         event.preventDefault();
 
-       // タイムスタンプ生成
+      // タイムスタンプ生成
         const now = new Date();
         const timestampStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
@@ -589,16 +589,20 @@
             note: finalNote
         };
 
-        // 【ここから消えていた送信処理】非同期通信でGASへPOST送信
+        // 【確実通信版】FormData形式に変換して確実にGASへ届けます
+        const postData = new URLSearchParams();
+        Object.keys(formData).forEach(key => {
+            postData.append(key, formData[key]);
+        });
+
         fetch(GAS_URL, {
             method: 'POST',
-            mode: 'no-cors', // クロスドメインエラーを回避
+            body: postData,
             headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
         })
-        .then(() => {
+        .then(response => {
             // 送信成功時：モーダルを表示してフォームをリセット
             document.getElementById('success-modal').classList.remove('hidden');
             document.getElementById('karte-form').reset();
