@@ -1,9 +1,5 @@
 <!DOCTYPE html>
 <html lang="ja">
-<script>
-  // GAS エンドポイント定義
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyTaHJP7o9ByAciGYg6mvzN_o_4UIQslMaJcU7X8ZLCwS1DQ-Y-Y78I1d92fnSriMrX/exec';
-</script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Sans+JP:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
+        // GAS エンドポイント定義
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbyTaHJP7o9ByAciGYg6mvzN_o_4UIQslMaJcU7X8ZLCwS1DQ-Y-Y78I1d92fnSriMrX/exec';
+
         tailwind.config = {
             theme: {
                 extend: {
@@ -333,7 +332,7 @@
 
         <div class="pt-2 text-center">
             <button type="submit" 
-                    class="w-full bg-salon-primary hover:bg-[#1A1A1A] text-white py-4 px-6 rounded-xl font-bold tracking-widest shadow-sm hover:shadow-md transition-all duration-300 transform active:scale-95 text-sm">
+                    class="w-full bg-salon-primary hover:bg-[#1A1A1A] text-white py-4 px-6 rounded-xl font-bold tracking-widest shadow-sm hover:shadow-md transition-all duration-300 transform active:scale-95 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                 ご記入内容を送信する
             </button>
             <p class="text-[10px] text-gray-400 mt-3">※ご入力いただいた個人情報は、サービス提供のみに利用し、安全に管理いたします。</p>
@@ -567,65 +566,70 @@
 
         // GASへ送信するデータの組み立て
         const payload = {
-            shop: currentShop,
             timestamp: timestampStr,
+            shopName: currentShop, // 現在選択されている店舗の正確な名前
             kana: document.getElementById('kana').value.trim(),
             name: document.getElementById('name').value.trim(),
             birthdate: document.getElementById('birthdate').value || '未回答',
-            gender: document.querySelector('input[name="gender"]:checked').value,
-            zip: document.getElementById('zip').value.trim(),       // 郵便番号を新設して連動
-            address: document.getElementById('address').value.trim(), // 新しい住所列へ連動
+            gender: document.querySelector('input[name="gender"]:checked')?.value || '未回答',
+            zip: document.getElementById('zip').value.trim() || '未回答',
+            address: document.getElementById('address').value.trim() || '未回答',
             tel: document.getElementById('tel').value.trim(),
-            email: document.getElementById('email').value.trim() || '未登録',
+            email: document.getElementById('email').value.trim() || '未回答',
             job: finalJob,
             trigger: finalTrigger,
-            triggerDetail: finalTriggerDetail,
-            service: finalService,
-            demand: selectedDemands.join(', ') || '特になし',
+            triggerDetail: finalTriggerDetail || 'なし',
+            serviceRequest: finalService,
+            demands: selectedDemands.join('、') || '特になし',
             note: finalNote
         };
 
-        // ボタンの多重クリック防止
+        // ボタンをローディング状態にする
         const submitBtn = event.target.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerText;
+        submitBtn.innerText = "送信中...";
         submitBtn.disabled = true;
-        submitBtn.innerText = '送信中...';
 
-        // fetchでGASにJSONデータを送信
+        // GASへPOST送信
         fetch(GAS_URL, {
             method: 'POST',
-            mode: 'no-cors', // クロスドメインエラーを回避する設定
+            mode: 'no-cors',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)
         })
         .then(() => {
-            // モーダルを表示
+            // 送信成功時：完了モーダルを表示してフォームと変数をクリア
             document.getElementById('success-modal').classList.remove('hidden');
-            // フォームをクリア
             document.getElementById('karte-form').reset();
-            // 選択状態の初期化
+            
+            // 各カスタム選択ボタンのスタイルリセット
             selectedDemands = [];
-            document.getElementById('demand-counter').innerText = '0 / 3';
+            document.getElementById('demand-counter').innerText = "0 / 3";
             document.querySelectorAll('.demand-btn').forEach(btn => {
                 btn.classList.remove('bg-salon-light', 'border-salon-primary', 'font-bold', 'opacity-40', 'cursor-not-allowed');
                 btn.classList.add('bg-white');
                 btn.querySelector('i').className = 'fa-regular fa-square text-gray-300 text-sm';
             });
-            document.querySelectorAll('.job-btn').forEach(btn => btn.classList.remove('bg-salon-primary', 'text-white', 'border-salon-primary'));
+            document.querySelectorAll('.job-btn').forEach(btn => {
+                btn.classList.remove('bg-salon-primary', 'text-white', 'border-salon-primary');
+                btn.classList.add('bg-white', 'hover:bg-salon-light');
+            });
             document.getElementById('student-options').classList.add('hidden');
-            document.getElementById('job-other').classList.add('hidden');
             document.getElementById('search-options').classList.add('hidden');
+            document.getElementById('job-other').classList.add('hidden');
             document.getElementById('trigger-detail').classList.add('hidden');
             document.getElementById('allergy-detail').classList.add('hidden');
         })
         .catch(error => {
-            alert('送信に失敗しました。電波の良い所で再度お試しください。');
             console.error('Error:', error);
+            alert('送信に失敗しました。電波状況を確認して再度お試しください。');
         })
         .finally(() => {
+            // ボタンの状態を復元
+            submitBtn.innerText = originalBtnText;
             submitBtn.disabled = false;
-            submitBtn.innerText = 'ご記入内容を送信する';
         });
     }
 
