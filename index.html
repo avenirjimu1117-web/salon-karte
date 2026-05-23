@@ -559,138 +559,109 @@
         }
     }
 
-    function handleFormSubmit(event) {
-        event.preventDefault();
+   function handleFormSubmit(event) {
+  event.preventDefault();
 
-        const now = new Date();
-        const timestampStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+  const now = new Date();
+  const timestampStr =
+    `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ` +
+    `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
-        let finalJob = selectedJob || '未回答';
-        const detailText = document.getElementById('job-other').value.trim();
+  let finalJob = selectedJob || '未回答';
+  const detailText = document.getElementById('job-other').value.trim();
 
-        if (selectedJob === '学生') {
-            if (selectedStudentType) {
-                finalJob = `学生 (${selectedStudentType})`;
-            } else {
-                finalJob = '学生';
-            }
-        } else if (selectedJob === 'その他' && detailText) {
-            finalJob = `その他 (${detailText})`;
-        }
+  if (selectedJob === '学生') {
+    finalJob = selectedStudentType ? `学生 (${selectedStudentType})` : '学生';
+  } else if (selectedJob === 'その他' && detailText) {
+    finalJob = `その他 (${detailText})`;
+  }
 
-        const triggerRadio = document.querySelector('input[name="trigger"]:checked');
-        let finalTrigger = triggerRadio ? triggerRadio.value : '未回答';
-        const triggerDetailText = document.getElementById('trigger-detail').value.trim();
+  const triggerRadio = document.querySelector('input[name="trigger"]:checked');
+  let finalTrigger = triggerRadio ? triggerRadio.value : '未回答';
+  let finalTriggerDetail = '';
 
-        if (finalTrigger === '検索サイト') {
-            if (selectedSearchType) {
-                finalTrigger = `検索サイト (${selectedSearchType})`;
-            }
-        } else if (triggerDetailText && (finalTrigger === 'ご紹介' || finalTrigger === '自宅・職場が近い / その他')) {
-            finalTrigger = `${finalTrigger} (${triggerDetailText})`;
-        }
+  const triggerDetailText = document.getElementById('trigger-detail').value.trim();
 
-        const allergyRadio = document.querySelector('input[name="allergy"]:checked');
-        let finalAllergy = allergyRadio ? allergyRadio.value : '未回答';
-        const allergyDetailText = document.getElementById('allergy-detail').value.trim();
-        if (finalAllergy === 'あり' && allergyDetailText) {
-            finalAllergy = `あり (${allergyDetailText})`;
-        }
-
-        const rawBirthdate = document.getElementById('birthdate').value;
-        let formattedBirthdate = '';
-        if (rawBirthdate) {
-            const bd = new Date(rawBirthdate);
-            formattedBirthdate = `${bd.getFullYear()}/${String(bd.getMonth() + 1).padStart(2, '0')}/${String(bd.getDate()).padStart(2, '0')}`;
-        }
-
-        const serviceRadio = document.querySelector('input[name="service-request"]:checked');
-        const finalService = serviceRadio ? serviceRadio.value : '未回答';
-
-        // GASスクリプトに送信するデータ
-        const formData = {
-            timestamp: timestampStr,
-            shop: currentShop,
-            kana: document.getElementById('kana').value.trim(),
-            name: document.getElementById('name').value.trim(),
-            birthdate: formattedBirthdate || '未登録',
-            gender: document.querySelector('input[name="gender"]:checked').value,
-            zip: document.getElementById('zip').value.trim(),
-            address: document.getElementById('address').value.trim(),
-            tel: document.getElementById('tel').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            job: finalJob,
-            trigger: finalTrigger,
-            service: finalService,
-            demand: selectedDemands.length > 0 ? selectedDemands.join(', ') : '未選択',
-            allergy: finalAllergy
-        };
-
-        // GASエンドポイントに送信
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycbw8Qnzdd0_CkaiRLNjjtn6ND60RWQd_JXcn0XRfDEDfrpQk_d5WsyKXKPAZStv23lA/exec';
-        
-        // FormData形式に変換して確実にGASへ届ける
-        const postData = new URLSearchParams();
-        Object.keys(formData).forEach(key => {
-            postData.append(key, formData[key]);
-        });
-
-        fetch(GAS_URL, {
-            method: 'POST',
-            body: postData,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        })
-        .then(response => {
-            console.log('GASへのデータ送信完了');
-            // フォーム送信完了モーダルを表示
-            document.getElementById('success-modal').classList.remove('hidden');
-            document.getElementById('karte-form').reset();
-        })
-        .catch(error => {
-            console.error('GAS送信エラー:', error);
-            // エラーでもモーダルは表示
-            document.getElementById('success-modal').classList.remove('hidden');
-        });
+  if (finalTrigger === '検索サイト') {
+    finalTriggerDetail = selectedSearchType || '';
+    if (selectedSearchType) {
+      finalTrigger = `検索サイト (${selectedSearchType})`;
     }
+  } else if (triggerDetailText) {
+    finalTriggerDetail = triggerDetailText;
+    finalTrigger = `${finalTrigger} (${triggerDetailText})`;
+  }
 
-    function closeSuccessModal() {
-        document.getElementById('success-modal').classList.add('hidden');
+  const allergyRadio = document.querySelector('input[name="allergy"]:checked');
+  let finalAllergy = allergyRadio ? allergyRadio.value : '未回答';
+
+  const allergyDetailText = document.getElementById('allergy-detail').value.trim();
+  if (finalAllergy === 'あり' && allergyDetailText) {
+    finalAllergy = `あり (${allergyDetailText})`;
+  }
+
+  const rawBirthdate = document.getElementById('birthdate').value;
+  let formattedBirthdate = '未登録';
+
+  if (rawBirthdate) {
+    const bd = new Date(rawBirthdate);
+    formattedBirthdate =
+      `${bd.getFullYear()}/${String(bd.getMonth() + 1).padStart(2, '0')}/${String(bd.getDate()).padStart(2, '0')}`;
+  }
+
+  const serviceRadio = document.querySelector('input[name="service-request"]:checked');
+  const finalService = serviceRadio ? serviceRadio.value : '未回答';
+
+  const formData = {
+    timestamp: timestampStr,
+    shop: currentShop,
+    shopName: currentShop,
+    kana: document.getElementById('kana').value.trim(),
+    name: document.getElementById('name').value.trim(),
+    birthdate: formattedBirthdate,
+    gender: document.querySelector('input[name="gender"]:checked').value,
+    zip: document.getElementById('zip').value.trim(),
+    address: document.getElementById('address').value.trim(),
+    tel: document.getElementById('tel').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    job: finalJob,
+    trigger: finalTrigger,
+    triggerDetail: finalTriggerDetail,
+    service: finalService,
+    serviceRequest: finalService,
+    demand: selectedDemands.length > 0 ? selectedDemands.join(', ') : '未選択',
+    demands: selectedDemands.length > 0 ? selectedDemands.join(', ') : '未選択',
+    allergy: finalAllergy,
+    note: ''
+  };
+
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbw8Onzdd0-_CkaIRLNljtn6ND6ORWQdJXCnOXRfDED0FrpOk_dSWsykXKPAZStv33IA/exec';
+
+  const postData = new URLSearchParams();
+  Object.keys(formData).forEach(key => {
+    postData.append(key, formData[key]);
+  });
+
+  fetch(GAS_URL, {
+    method: 'POST',
+    body: postData,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+    .then(response => response.json())
+    .then(result => {
+      console.log(result);
+
+      if (result.status === 'success') {
+        document.getElementById('success-modal').classList.remove('hidden');
         document.getElementById('karte-form').reset();
-        
-        selectedJob = '';
-        selectedStudentType = '';
-        selectedSearchType = '';
-
-        const jobBtns = document.querySelectorAll('.job-btn');
-        jobBtns.forEach(b => b.classList.remove('bg-salon-primary', 'text-white', 'border-salon-primary'));
-        
-        const subStudentBtns = document.querySelectorAll('.student-type-btn');
-        subStudentBtns.forEach(b => b.classList.remove('bg-salon-primary', 'text-white', 'border-salon-primary'));
-
-        const subSearchBtns = document.querySelectorAll('.search-type-btn');
-        subSearchBtns.forEach(b => b.classList.remove('bg-salon-primary', 'text-white', 'border-salon-primary'));
-
-        document.getElementById('student-options').classList.add('hidden');
-        document.getElementById('search-options').classList.add('hidden');
-        document.getElementById('job-other').classList.add('hidden');
-        document.getElementById('trigger-detail').classList.add('hidden');
-        document.getElementById('allergy-detail').classList.add('hidden');
-
-        selectedDemands = [];
-        document.getElementById('demand-counter').innerText = '0 / 3';
-        const demandBtns = document.querySelectorAll('.demand-btn');
-        demandBtns.forEach(btn => {
-            btn.classList.remove('bg-salon-light', 'border-salon-primary', 'font-bold', 'opacity-40', 'cursor-not-allowed');
-            btn.classList.add('bg-white');
-            const icon = btn.querySelector('i');
-            icon.className = 'fa-regular fa-square text-gray-300 text-sm';
-        });
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-</script>
-
-</body>
-</html>
+      } else {
+        alert('送信エラー：' + result.message);
+      }
+    })
+    .catch(error => {
+      console.error('GAS送信エラー:', error);
+      alert('送信に失敗しました。GAS URLまたはデプロイ設定を確認してください。');
+    });
+}
