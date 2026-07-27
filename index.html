@@ -79,6 +79,8 @@
 
 <div class="max-w-2xl mx-auto px-4 mt-8">
 
+  <div id="karte-screen">
+
   <div class="text-center py-8 mb-6 bg-white rounded-3xl border border-salon-border shadow-sm p-6">
     <h1 id="brand-logo-text" class="brand-title text-2xl md:text-3xl font-light tracking-widest text-salon-primary mb-3 transition-all duration-300">
       Arbre et chimie
@@ -376,6 +378,64 @@
     </div>
   </form>
 
+  </div><!-- /#karte-screen -->
+
+  <!-- ==================== メニュー選択画面（同意書が必要な3店舗のみ表示） ==================== -->
+  <div id="menu-screen" class="hidden fade-in">
+    <div class="text-center py-8 mb-6 bg-white rounded-3xl border border-salon-border shadow-sm p-6">
+      <h1 id="menu-brand-logo-text" class="brand-title text-2xl md:text-3xl font-light tracking-widest text-salon-primary mb-3">
+        Arbre et chimie
+      </h1>
+      <div class="h-[1px] w-16 bg-salon-accent/20 mx-auto mb-4"></div>
+      <p class="text-[11px] text-gray-400 leading-relaxed">
+        本日のメニューをお選びください。<br>
+        複数選択いただけます。
+      </p>
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-salon-border space-y-4">
+      <h2 class="text-sm font-bold tracking-wider text-salon-primary flex items-center gap-2 border-b border-salon-border pb-3">
+        <i class="fa-regular fa-square-check text-xs"></i>
+        本日のメニュー <span class="text-red-400 text-[9px] font-normal ml-1">必須・複数選択可</span>
+      </h2>
+
+      <div id="menu-grid" class="grid grid-cols-2 gap-3"></div>
+
+      <p id="menu-helper-text" class="text-[11px] text-gray-400 text-center pt-1">
+        メニューを1つ以上選択してください
+      </p>
+    </div>
+
+    <div class="pt-6 text-center">
+      <button id="menu-next-btn" type="button" onclick="proceedToConsentScreen()" disabled
+              class="w-full bg-black hover:bg-[#1A1A1A] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-4 px-6 rounded-xl font-bold tracking-widest shadow-sm hover:shadow-md transition-all duration-300 transform active:scale-95 text-sm">
+        同意書の入力へ進む
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== 同意書入力画面（選択メニュー分の同意書サイトへ自動的に遷移） ==================== -->
+  <div id="consent-screen" class="hidden fade-in">
+    <div class="text-center py-12 bg-white rounded-3xl border border-salon-border shadow-sm p-6">
+      <h1 class="brand-title text-2xl md:text-3xl font-light tracking-widest text-salon-primary mb-3">
+        同意書のご入力
+      </h1>
+      <div class="h-[1px] w-16 bg-salon-accent/20 mx-auto mb-6"></div>
+      <p class="text-[12px] text-gray-500 leading-relaxed mb-6" id="consent-redirect-text">
+        選択いただいたメニューの同意書ページへ移動します。<br>
+        自動で切り替わらない場合は、下のボタンをお押しください。
+      </p>
+      <a id="consent-redirect-link" href="#"
+         class="inline-block bg-black hover:bg-[#1A1A1A] text-white py-3 px-10 rounded-xl font-bold tracking-widest shadow-sm hover:shadow-md transition-all duration-300 text-sm">
+        同意書へ進む
+      </a>
+    </div>
+    <button type="button" onclick="showMenuScreen()"
+            class="mt-4 mx-auto block text-[11px] text-gray-400 underline">
+      メニュー選択に戻る
+    </button>
+  </div>
+
   <div id="success-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-xl border border-salon-border fade-in">
       <div class="w-14 h-14 bg-salon-light text-salon-primary rounded-full flex items-center justify-center mx-auto mb-4 text-xl">
@@ -388,16 +448,28 @@
         ご記入ありがとうございました
       </p>
 
-      <p class="text-[11px] text-gray-400 mb-6 leading-relaxed">
+      <p id="success-modal-subtext" class="text-[11px] text-gray-400 mb-6 leading-relaxed">
         カルテ情報が送信されました。
       </p>
 
-      <button onclick="closeSuccessModal()"
+      <button id="modal-action-btn" onclick="closeSuccessModal()"
               class="w-full bg-salon-primary hover:bg-[#1A1A1A] text-white py-2.5 px-6 rounded-lg text-xs font-bold transition">
         完了
       </button>
     </div>
   </div>
+
+  <!-- 完了画面（同意書提出後） -->
+  <div id="complete-screen" class="hidden fade-in">
+    <div class="text-center py-12 bg-white rounded-3xl border border-salon-border shadow-sm p-6">
+      <div class="w-14 h-14 bg-salon-light text-salon-primary rounded-full flex items-center justify-center mx-auto mb-4 text-xl">
+        <i class="fa-regular fa-face-smile"></i>
+      </div>
+      <h1 class="brand-title text-2xl font-light tracking-widest text-salon-primary mb-3">Thank you</h1>
+      <p class="text-xs text-gray-500">ご来店ありがとうございました。受付が完了しました。</p>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -410,17 +482,78 @@
     liora: 'Liora nail&eye'
   };
 
-  let currentShopId = 'arbre';
-  let currentShop = 'Arbre et chimie';
+  // 店舗ごとの同意書要否とメニュー一覧
+  // ・Arbre et chimieは同意書なし
+  // ・Choupinet / Miroir / Lioraは同意書あり（Miroirはネイル非対応）
+  const STORE_CONFIG = {
+    arbre: { consentRequired: false, menus: [] },
+    choupinet: { consentRequired: true, menus: ['nail', 'perm', 'extension', 'eyebrow'] },
+    miroir: { consentRequired: true, menus: ['perm', 'extension', 'eyebrow'] },
+    liora: { consentRequired: true, menus: ['nail', 'perm', 'extension', 'eyebrow'] }
+  };
+
+  const MENU_LABELS = {
+    nail: 'ネイル',
+    perm: 'まつげパーマ',
+    extension: 'まつ毛エクステ',
+    eyebrow: 'アイブロウ'
+  };
+
+  // ==================== 同意書サイトとの連携設定 ====================
+  // 同意書8フォームをデプロイしたVercelサイトのベースURL。
+  // デプロイ後、実際のURLに書き換えてください。
+  const CONSENT_FORMS_BASE_URL = 'https://consent-forms-weld.vercel.app';
+
+  // メニュー×店舗 → 同意書サイトのパス
+  // ・nailはChoupinet用/Liora用のみ（Miroirはネイル非対応のためメニュー自体が出ない）
+  // ・perm(まつげパーマ=ラッシュリフト)/extension(まつ毛エクステ)/eyebrow(アイブロウ)は
+  //   Choupinet用と、Miroir/Liora共通の2種類
+  const CONSENT_PATH_MAP = {
+    nail:      { choupinet: '/nail-choupinet',          liora: '/nail' },
+    perm:      { choupinet: '/lash-lift-choupinet',      shared: '/lash-lift' },
+    extension: { choupinet: '/lash-extension-choupinet', shared: '/lash-extension' },
+    eyebrow:   { choupinet: '/eyebrow-choupinet',        shared: '/eyebrow' },
+  };
+
+  function getConsentFormPath(storeId, menuKey) {
+    const map = CONSENT_PATH_MAP[menuKey];
+    if (!map) return null;
+    if (storeId === 'choupinet') return map.choupinet || null;
+    if (menuKey === 'nail') return map.liora || null; // miroirはnailの選択肢自体がないためここには来ない想定
+    return map.shared || null; // miroir / liora 共通
+  }
+
+  // 選択メニュー分の同意書URLを「次のURLへ自動遷移する」チェーンとして組み立てる。
+  // 最後の同意書を終えたら、カルテアプリ自身の完了画面（?flow=complete）に戻ってくる。
+  function buildConsentChainUrl(menus) {
+    const paths = menus
+      .map(menuKey => getConsentFormPath(currentShopId, menuKey))
+      .filter(Boolean);
+
+    if (paths.length === 0) return null;
+
+    const finalUrl = `${window.location.origin}${window.location.pathname}?shop=${currentShopId}&flow=complete`;
+
+    let chained = finalUrl;
+    for (let i = paths.length - 1; i >= 0; i--) {
+      const url = `${CONSENT_FORMS_BASE_URL}${paths[i]}`;
+      const sep = url.includes('?') ? '&' : '?';
+      chained = `${url}${sep}next=${encodeURIComponent(chained)}`;
+    }
+    return chained;
+  }
 
   let selectedJob = '';
   let selectedStudentType = '';
   let selectedSearchType = '';
   let selectedDemands = [];
+  let selectedMenus = [];
+  let currentVisitId = '';
 
   window.onload = function () {
     const params = new URLSearchParams(window.location.search);
     const shopParam = params.get('shop');
+    const flowParam = params.get('flow');
 
     if (shopParam && shopMap[shopParam]) {
       currentShopId = shopParam;
@@ -431,7 +564,23 @@
     }
 
     document.getElementById('brand-logo-text').innerText = currentShop;
+    document.getElementById('menu-brand-logo-text').innerText = currentShop;
+
+    // 同意書サイトから遷移して戻ってきた場合は、完了画面を直接表示する
+    if (flowParam === 'complete') {
+      document.getElementById('karte-screen').classList.add('hidden');
+      document.getElementById('complete-screen').classList.remove('hidden');
+    }
   };
+
+  function generateVisitId() {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const rand = Math.random().toString(36).slice(2, 7);
+    return `${currentShopId}_${y}${m}${d}_${rand}`;
+  }
 
   function selectJob(jobName) {
     selectedJob = jobName;
@@ -662,6 +811,14 @@
       body: postData
     })
     .then(() => {
+      // カルテ本体の送信が完了。来店IDを発行し、店舗ID・来店IDを
+      // 以降のメニュー選択／同意書ステップへ引き継げるようセッションに保持する。
+      currentVisitId = generateVisitId();
+      sessionStorage.setItem('storeId', currentShopId);
+      sessionStorage.setItem('visitId', currentVisitId);
+      sessionStorage.setItem('customerName', document.getElementById('name').value.trim());
+
+      setupSuccessModal();
       document.getElementById('success-modal').classList.remove('hidden');
       document.getElementById('karte-form').reset();
     })
@@ -675,9 +832,115 @@
     });
   }
 
+  // 店舗の同意書要否に応じて、完了モーダルの文言とボタンの遷移先を切り替える
+  function setupSuccessModal() {
+    const config = STORE_CONFIG[currentShopId];
+    const subtext = document.getElementById('success-modal-subtext');
+    const btn = document.getElementById('modal-action-btn');
+
+    if (config.consentRequired) {
+      subtext.innerText = 'カルテ情報が送信されました。続けて本日のメニューをお選びください。';
+      btn.innerText = '次へ（メニュー選択）';
+      btn.onclick = function () {
+        document.getElementById('success-modal').classList.add('hidden');
+        showMenuScreen();
+      };
+    } else {
+      subtext.innerText = 'カルテ情報が送信されました。';
+      btn.innerText = '完了';
+      btn.onclick = closeSuccessModal;
+    }
+  }
+
   function closeSuccessModal() {
     document.getElementById('success-modal').classList.add('hidden');
     location.reload();
+  }
+
+  /* ==================== メニュー選択画面 ==================== */
+
+  function showMenuScreen() {
+    document.getElementById('karte-screen').classList.add('hidden');
+    document.getElementById('consent-screen').classList.add('hidden');
+    document.getElementById('complete-screen').classList.add('hidden');
+    document.getElementById('menu-screen').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    renderMenuGrid();
+  }
+
+  function renderMenuGrid() {
+    const grid = document.getElementById('menu-grid');
+    const config = STORE_CONFIG[currentShopId];
+    grid.innerHTML = '';
+
+    config.menus.forEach(menuKey => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.menu = menuKey;
+      btn.className = 'menu-select-btn p-5 text-sm font-bold border border-salon-border rounded-xl bg-white hover:bg-salon-light transition-all flex flex-col items-center justify-center gap-2';
+      btn.innerHTML = `
+        <i class="fa-regular fa-square text-gray-300 text-base menu-check-icon"></i>
+        <span>${MENU_LABELS[menuKey]}</span>
+      `;
+      btn.onclick = function () { toggleMenuSelection(btn, menuKey); };
+      grid.appendChild(btn);
+    });
+  }
+
+  function toggleMenuSelection(btn, menuKey) {
+    const index = selectedMenus.indexOf(menuKey);
+    const icon = btn.querySelector('.menu-check-icon');
+
+    if (index > -1) {
+      selectedMenus.splice(index, 1);
+      btn.classList.remove('bg-salon-light', 'border-salon-primary');
+      btn.classList.add('bg-white');
+      icon.className = 'fa-regular fa-square text-gray-300 text-base menu-check-icon';
+    } else {
+      selectedMenus.push(menuKey);
+      btn.classList.add('bg-salon-light', 'border-salon-primary');
+      btn.classList.remove('bg-white');
+      icon.className = 'fa-solid fa-square-check text-salon-primary text-base menu-check-icon';
+    }
+
+    const nextBtn = document.getElementById('menu-next-btn');
+    const helper = document.getElementById('menu-helper-text');
+
+    nextBtn.disabled = selectedMenus.length === 0;
+    helper.innerText = selectedMenus.length === 0
+      ? 'メニューを1つ以上選択してください'
+      : `${selectedMenus.length}件選択中：${selectedMenus.map(m => MENU_LABELS[m]).join('・')}`;
+  }
+
+  /* ==================== 同意書入力画面 ==================== */
+
+  function proceedToConsentScreen() {
+    if (selectedMenus.length === 0) return;
+
+    // 選択メニューをセッションに保存（同一オリジン内で参照する場合の予備。
+    // 実際の受け渡しはURLの?next=チェーンで行う）
+    sessionStorage.setItem('selectedMenus', JSON.stringify(selectedMenus));
+
+    document.getElementById('menu-screen').classList.add('hidden');
+    document.getElementById('consent-screen').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const chainUrl = buildConsentChainUrl(selectedMenus);
+    const link = document.getElementById('consent-redirect-link');
+
+    if (!chainUrl) {
+      document.getElementById('consent-redirect-text').innerText =
+        '選択されたメニューに対応する同意書が見つかりませんでした。スタッフまでお声がけください。';
+      link.style.display = 'none';
+      return;
+    }
+
+    link.href = chainUrl;
+
+    // 少し待ってから自動的に同意書サイトへ遷移（ボタンは遷移しない場合の保険）
+    setTimeout(() => {
+      window.location.href = chainUrl;
+    }, 1200);
   }
 </script>
 
